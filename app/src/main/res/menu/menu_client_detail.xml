@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.huebelancer.timehound.Activities.ClientDetailActivity">
+    <item
+        android:id="@+id/hide_client"
+        android:orderInCategory="100"
+        android:title="@string/hide_client"
+        app:showAsAction="never" />
+</menu>

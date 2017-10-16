@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">TimeHound</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <array name="client_settings_options">
+        <item>History</item>
+        <item>Notes</item>
+    </array>
+    <string name="title_activity_client_detail">ClientDetailActivity</string>
+    <string name="tab_text_1">Current</string>
+    <string name="tab_text_2">Notes</string>
+    <string name="tab_text_3">History</string>
+    <string name="hide_client">Hide Client</string>
+    <string name="show_client">Show Client</string>
+    <string name="show_clients">Show Hidden Clients</string>
+    <string name="hide_clients">Hide Hidden Clients</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+</resources>
