@@ -1,19 +1,20 @@
 package com.huebelancer.timehound.Activities.ClientsList
 
 
-import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TextInputEditText
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.huebelancer.timehound.Activities.ClientsActivity
 import com.huebelancer.timehound.Coordinators.Coordinator
@@ -40,6 +41,7 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
     private lateinit var submitClient: Button
     private lateinit var cancelNewClient: Button
     private lateinit var addedClientName: EditText
+    private lateinit var emptyListView: TextView
     private lateinit var fab: FloatingActionButton
 
     private var clients: MutableList<ClientDTO> = mutableListOf()
@@ -89,6 +91,7 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
             addedClientName = view.findViewById(R.id.add_client_name)
             cancelNewClient = view.findViewById(R.id.add_client_cancel)
             recyclerView    = view.findViewById(R.id.recyclerView)
+            emptyListView   = view.findViewById(R.id.emptyListView)
 
             initializeListView()
             initializeButtons()
@@ -194,10 +197,11 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
         adapter.notifyDataSetChanged()
 
         if (clients.size == 0) {
-            createDummyClients()
+            emptyListView.visibility = View.VISIBLE
+        } else {
+            emptyListView.visibility = View.GONE
         }
 
-//        Toast.makeText(activity,   "${clients.size} records displayed", Toast.LENGTH_SHORT).show()
     }
 
     override fun onLoadedCallback(client: ClientDTO) {
@@ -206,10 +210,22 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
 
     override fun onNoDataFound() {
         Toast.makeText(activity, "no data found", Toast.LENGTH_SHORT).show()
-        createDummyClients()
+//        createDummyClients()
+        if (clients.size == 0) {
+            emptyListView.visibility = View.VISIBLE
+        } else {
+            emptyListView.visibility = View.GONE
+        }
     }
 
     override fun onError(error: Exception) {
+        if (error.message!!.contains("already exists!")) {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Error!")
+                    .setMessage(error.message)
+                    .setNeutralButton("OK", null)
+            builder.create().show()
+        }
         error.printStackTrace()
     }
 

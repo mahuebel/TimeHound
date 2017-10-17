@@ -2,6 +2,7 @@ package com.huebelancer.timehound.ModelLayer.Database
 
 import android.os.AsyncTask
 import android.util.Log
+import com.huebelancer.timehound.Helpers.ClientExistsException
 import com.huebelancer.timehound.Helpers.Helpers
 import com.huebelancer.timehound.ModelLayer.Database.DTOs.ClientDTO
 import com.huebelancer.timehound.ModelLayer.Database.DTOs.EventDTO
@@ -34,9 +35,20 @@ class DataLayer(private val realm: Realm, private val translationLayer: Translat
 
     fun addClient(showHidden: Boolean, clientDto: ClientDTO, callback: ModelLayer.RealmLoadCallback) {
         realm.executeTransaction {
-            val client = realm.createObject(Client::class.java)
-            client.hidden = clientDto.hidden
-            client.name   = clientDto.name
+            val existing: Client? = realm.where(Client::class.java).equalTo("name", clientDto.name).findFirst()
+
+            if (existing != null) {
+                if (existing.hidden != null && existing.hidden!!) {
+                    existing.hidden = false
+                } else {
+                    callback.onError(ClientExistsException("${clientDto.name} already exists!"))
+                }
+            } else {
+
+                val client = realm.createObject(Client::class.java)
+                client.hidden = clientDto.hidden
+                client.name = clientDto.name
+            }
         }
         Log.d(TAG, "Client added")
 
