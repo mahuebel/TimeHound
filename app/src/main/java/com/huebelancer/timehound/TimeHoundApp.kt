@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.support.v7.app.AppCompatDelegate
 import com.huebelancer.timehound.Dependencies.DependencyRegistry
 import com.huebelancer.timehound.Helpers.Constants
 import io.realm.Realm
@@ -17,6 +18,8 @@ class TimeHoundApp : Application() {
     var registry: DependencyRegistry? = null
     override fun onCreate() {
         super.onCreate()
+
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
         Realm.init(this)
 

@@ -13,23 +13,35 @@ class ClientPresenter(val fragment: ClientFragment, private val modelLayer: Mode
 
     lateinit var clientName: String
 
-    val callback: ModelLayer.RealmLoadCallback = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
+    var callback: ModelLayer.RealmLoadCallback? = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
 
     fun bill(lastOpenPeriod: BillPeriodDTO) {
+        checkCallback()
         if (!lastOpenPeriod.isBilled && lastOpenPeriod.events.size > 0)
-            modelLayer.billLastPeriod(clientName, (fragment.activity as ClientDetailActivity).getRealmLoadCallback())
+            modelLayer.billLastPeriod(clientName, callback!!)
+    }
+
+    private fun checkCallback() {
+        if (callback == null)
+            setCallback()
+    }
+
+    private fun setCallback() {
+        callback = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
     }
 
     fun editSpan(span: Span, start: Date, end: Date) {
         val startEvent = span.start
         val endEvent = span.end
 
+        checkCallback()
+
         if (startEvent.clientId != null && startEvent.clientId != "" && startEvent.time != start) {
-            modelLayer.editEvent(startEvent, start, callback)
+            modelLayer.editEvent(startEvent, start, callback!!)
         }
 
         if (endEvent.clientId !=  null && endEvent.clientId != "" && endEvent.time != end) {
-            modelLayer.editEvent(endEvent, end, callback)
+            modelLayer.editEvent(endEvent, end, callback!!)
         }
     }
 

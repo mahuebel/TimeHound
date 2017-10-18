@@ -12,18 +12,30 @@ class ClientNotesPresenter(val fragment: ClientNotesFragment, val modelLayer: Mo
 
     lateinit var clientName: String
 
-    val callback = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
+    var callback: ModelLayer.RealmLoadCallback?  = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
 
     fun addNote(text: String) {
-        modelLayer.addClientNote(clientName, text, (fragment.activity as ClientDetailActivity).getRealmLoadCallback())
+        checkCallback()
+
+        modelLayer.addClientNote(clientName, text, callback!!)
+    }
+
+    private fun checkCallback() {
+        if (callback == null)
+            setCallback()
     }
 
     fun destroy() {
 
     }
 
+    fun setCallback() {
+        callback = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
+    }
+
     fun editNote(client: ClientDTO?, note: NoteDTO, newText: String) {
-        modelLayer.editNote(client, note, newText, callback)
+        checkCallback()
+        modelLayer.editNote(client, note, newText, callback!!)
     }
 
 }

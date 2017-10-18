@@ -12,7 +12,7 @@ class ClientHistoryPresenter(val fragment: ClientHistoryFragment, val modelLayer
 
     lateinit var clientName: String
 
-    val callback: ModelLayer.RealmLoadCallback = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
+    var callback: ModelLayer.RealmLoadCallback? = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
 
     fun destroy() {
 
@@ -22,13 +22,24 @@ class ClientHistoryPresenter(val fragment: ClientHistoryFragment, val modelLayer
         val startEvent = span.start
         val endEvent = span.end
 
+        checkCallback()
+
         if (startEvent.clientId != null && startEvent.clientId != "" && startEvent.time != start) {
-            modelLayer.editEvent(startEvent, start, callback)
+            modelLayer.editEvent(startEvent, start, callback!!)
         }
 
         if (endEvent.clientId !=  null && endEvent.clientId != "" && endEvent.time != end) {
-            modelLayer.editEvent(endEvent, end, callback)
+            modelLayer.editEvent(endEvent, end, callback!!)
         }
+    }
+
+    private fun checkCallback() {
+        if (callback == null)
+            setCallback()
+    }
+
+    private fun setCallback() {
+        callback = (fragment.activity as ClientDetailActivity).getRealmLoadCallback()
     }
 
 

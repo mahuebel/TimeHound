@@ -47,7 +47,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
     private lateinit var clientName: String
 
-    private lateinit var presenter: ClientDetailPresenter
+    private var presenter: ClientDetailPresenter? = null
     private lateinit var coordinator: Coordinator
     private lateinit var mSubscriptionManager: SubscriptionManager
 
@@ -250,7 +250,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
         else
             item.title = getString(R.string.hide_client)
 
-        presenter.toggleClientVisibility()
+        presenter?.toggleClientVisibility()
     }
 
 
@@ -314,7 +314,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
             R.id.addClockFab -> {
                 set.addTarget(mChronometer)
 
-                presenter.toggleClock(this)
+                presenter?.toggleClock(this)
             }
 
         }
@@ -324,7 +324,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
 
 
 
-    fun getRealmLoadCallback() : ModelLayer.RealmLoadCallback {
+    fun getRealmLoadCallback() : ModelLayer.RealmLoadCallback? {
         return presenter
     }
 
@@ -332,7 +332,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
         this.presenter = presenter
         this.coordinator = coordinator
 
-        this.presenter.clientName = clientName
+        this.presenter?.clientName = clientName
         mSubscriptionManager= subscriptionManager
 
         presenter.loadData()
@@ -340,7 +340,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
 
 
     override fun onDestroy() {
-        presenter.destroy()
+        presenter?.destroy()
         super.onDestroy()
     }
 

@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.*
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -151,6 +152,7 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
             fab.visibility = View.VISIBLE
         }
         */
+        Log.d(TAG, "clicked!")
         val view = LayoutInflater.from(activity).inflate(R.layout.dialog_edit_text, null, false)
         val editText = view.findViewById<TextInputEditText>(R.id.editText)
         editText.hint = "New Client Name"
