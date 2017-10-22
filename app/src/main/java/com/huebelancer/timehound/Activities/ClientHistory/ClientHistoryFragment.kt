@@ -21,13 +21,15 @@ import com.huebelancer.timehound.R
 import java.util.*
 
 
-class ClientHistoryFragment : Fragment(), ClientUpdateListener, ClockEventListener, OnClockEditDone {
-
+class ClientHistoryFragment : Fragment(), ClientUpdateListener, ClockEventListener, OnClockEditDone, FragmentShowCallback {
+    override fun onFragmentShown() : View.OnClickListener? {
+        return null
+    }
 
     private var clientName: String = ""
     private lateinit var presenter: ClientHistoryPresenter
     private lateinit var coordinator: Coordinator
-    private lateinit var appbarCallback: AppbarCallback
+    private lateinit var detailActivityCallback: DetailActivityCallback
 
     private var recyclerView: RecyclerView? = null
 
@@ -35,7 +37,7 @@ class ClientHistoryFragment : Fragment(), ClientUpdateListener, ClockEventListen
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        appbarCallback = activity as ClientDetailActivity
+        detailActivityCallback = activity as ClientDetailActivity
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

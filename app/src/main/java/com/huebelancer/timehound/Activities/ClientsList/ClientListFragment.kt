@@ -20,7 +20,7 @@ import android.widget.Toast
 import com.huebelancer.timehound.Activities.ClientsActivity
 import com.huebelancer.timehound.Coordinators.Coordinator
 import com.huebelancer.timehound.Dependencies.DependencyRegistry
-import com.huebelancer.timehound.Helpers.AppbarCallback
+import com.huebelancer.timehound.Helpers.DetailActivityCallback
 import com.huebelancer.timehound.Helpers.Constants
 import com.huebelancer.timehound.Helpers.CustomItemClickListener
 import com.huebelancer.timehound.ModelLayer.Database.DTOs.ClientDTO
@@ -48,11 +48,11 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
     private var clients: MutableList<ClientDTO> = mutableListOf()
 
 
-    private lateinit var appbarCallback: AppbarCallback
+    private lateinit var detailActivityCallback: DetailActivityCallback
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        appbarCallback = activity as ClientsActivity
+        detailActivityCallback = activity as ClientsActivity
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +75,7 @@ class ClientListFragment : Fragment(), CustomItemClickListener, ModelLayer.Realm
     override fun onResume() {
         super.onResume()
 
-        appbarCallback.setAppTitle(Constants.APP_TITLE)
+        detailActivityCallback.setAppTitle(Constants.APP_TITLE)
 
         loadClients()
 

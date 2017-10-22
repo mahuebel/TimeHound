@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog
 import com.huebelancer.timehound.Helpers.ClientUICallback
 import com.huebelancer.timehound.ModelLayer.Database.DTOs.ClientDTO
 import com.huebelancer.timehound.ModelLayer.ModelLayer
+import com.huebelancer.timehound.Utilities.Analytics
 
 /**
  * Created by mahuebel on 10/14/17.
@@ -72,7 +73,10 @@ class ClientDetailPresenter(val activity: ClientDetailActivity, private val mode
     }
 
     private fun startChronometer() {
-        isOnTheClock = true
+        if (!isOnTheClock) {
+            Analytics.getInstance().clockIn(clientName)
+            isOnTheClock = true
+        }
         if(clockHandler == null) {
             clockHandler = Handler()
 
@@ -81,7 +85,10 @@ class ClientDetailPresenter(val activity: ClientDetailActivity, private val mode
     }
 
     private fun stopChronometer() {
-        isOnTheClock = false
+        if (isOnTheClock) {
+            Analytics.getInstance().clockOut(clientName)
+            isOnTheClock = false
+        }
     }
 
 

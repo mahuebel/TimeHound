@@ -6,8 +6,12 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.support.v7.app.AppCompatDelegate
+import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
 import com.huebelancer.timehound.Dependencies.DependencyRegistry
 import com.huebelancer.timehound.Helpers.Constants
+import com.huebelancer.timehound.Utilities.Analytics
+import io.fabric.sdk.android.Fabric
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
@@ -18,6 +22,10 @@ class TimeHoundApp : Application() {
     var registry: DependencyRegistry? = null
     override fun onCreate() {
         super.onCreate()
+
+        Analytics.initialize(this)
+
+        Analytics.getInstance().appLaunch()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 

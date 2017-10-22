@@ -4,18 +4,19 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.huebelancer.timehound.Activities.ClientDetails.ClientFragment
 import com.huebelancer.timehound.Activities.ClientsList.ClientListFragment
 import com.huebelancer.timehound.Coordinators.Coordinator
 import com.huebelancer.timehound.Dependencies.DependencyRegistry
-import com.huebelancer.timehound.Helpers.AppbarCallback
+import com.huebelancer.timehound.Helpers.DetailActivityCallback
 import com.huebelancer.timehound.Helpers.Helpers
 import com.huebelancer.timehound.R
+import com.huebelancer.timehound.Utilities.Analytics
 import com.huebelancer.timehound.Utilities.NotificationService
 import kotlinx.android.synthetic.main.activity_client_detail.*
 
-class ClientsActivity : AppCompatActivity(), AppbarCallback {
-
+class ClientsActivity : AppCompatActivity(), DetailActivityCallback {
     interface HiddenListener {
         fun onChange(showHidden: Boolean)
     }
@@ -27,6 +28,7 @@ class ClientsActivity : AppCompatActivity(), AppbarCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Analytics.getInstance().viewedClientList()
         setContentView(R.layout.activity_clients)
 
         DependencyRegistry.shared.inject(this)

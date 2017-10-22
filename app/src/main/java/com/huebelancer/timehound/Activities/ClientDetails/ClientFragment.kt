@@ -19,32 +19,39 @@ import android.util.Log
 import com.huebelancer.timehound.Activities.ClientDetailActivity
 import com.huebelancer.timehound.Helpers.*
 import com.huebelancer.timehound.ModelLayer.Database.Models.Span
+import com.huebelancer.timehound.Utilities.Analytics
 import java.util.*
 
 
-class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, ClockEventListener, OnClockEditDone {
-
+class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, ClockEventListener, OnClockEditDone, FragmentShowCallback {
+    override fun onFragmentShown() : View.OnClickListener? {
+        return this
+    }
 
     private var clientName: String = ""
-    private lateinit var presenter: ClientPresenter
+    private var presenter: ClientPresenter? = null
     private lateinit var coordinator: Coordinator
 
     private var recyclerView: RecyclerView? = null
-    private lateinit var billFab: FloatingActionButton
+//    private lateinit var billFab: FloatingActionButton
 
     var client: ClientDTO? = null
 
-    private lateinit var appbarCallback: AppbarCallback
+    private lateinit var detailActivityCallback: DetailActivityCallback
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        appbarCallback = activity as ClientDetailActivity
+        Log.d(TAG, "onAttach")
+
+        detailActivityCallback = activity as ClientDetailActivity
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         DependencyRegistry.shared.inject(this)
+        Log.d(TAG, "onCreate")
+
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -54,6 +61,7 @@ class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, C
         attachUI(view)
 
         setBackgroundGradient()
+        Log.d(TAG, "onCreateView")
 
         return view
     }
@@ -72,6 +80,8 @@ class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, C
     override fun onResume() {
         super.onResume()
 
+        Log.d(TAG, "onResume")
+
         setupUI()
 
     }
@@ -88,15 +98,15 @@ class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, C
     private fun attachUI(view: View?) {
         val manager = LinearLayoutManager(activity)
 
-        billFab         = view!!.findViewById(R.id.billFab)
-        recyclerView    = view.findViewById(R.id.recyclerView)
+//        billFab         = view!!.findViewById(R.id.billFab)
+        recyclerView    = view?.findViewById(R.id.recyclerView)
 
         recyclerView?.layoutManager = manager
         recyclerView?.setHasFixedSize(true)
 
         initializeListView()
 
-        billFab.setOnClickListener(this)
+//        billFab.setOnClickListener(this)
     }
 
 
@@ -109,22 +119,27 @@ class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, C
         recyclerView?.adapter = adapter
     }
 
-    fun configureWith(presenter: ClientPresenter, coordinator: Coordinator) {
-        this.presenter = presenter
+    fun configureWith(prsntr: ClientPresenter, coordinator: Coordinator) {
+        presenter = prsntr
         this.coordinator = coordinator
 
-        presenter.clientName = clientName
+        presenter?.clientName = clientName
     }
 
 
     override fun onClick(view: View?) {
         when(view?.id) {
-            R.id.billFab -> {
-                presenter.bill(client!!.lastOpenPeriod())
+            R.id.detailFAB -> {
+                handleBillClick()
             }
         }
     }
 
+    fun handleBillClick() {
+        Log.d(TAG, "clicked bill fab, presenter is null? ${clientName} - ${presenter == null}")
+        Analytics.getInstance().periodBilled(client!!.lastOpenPeriod())
+        presenter?.bill(client!!.lastOpenPeriod())
+    }
 
     override fun onUpdate(dto: ClientDTO) {
         client = dto
@@ -144,7 +159,7 @@ class ClientFragment : Fragment(), View.OnClickListener, ClientUpdateListener, C
     }
 
     override fun onClockEditDone(span: Span, start: Date, end: Date) {
-        presenter.editSpan(span, start, end)
+        presenter?.editSpan(span, start, end)
     }
 
 

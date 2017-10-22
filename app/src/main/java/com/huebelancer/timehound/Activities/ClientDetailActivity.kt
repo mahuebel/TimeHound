@@ -18,6 +18,7 @@ import android.support.transition.Slide
 import android.support.transition.TransitionManager
 import android.support.transition.TransitionSet
 import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewPager
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.util.Log
 import android.view.*
@@ -35,10 +36,17 @@ import com.huebelancer.timehound.ModelLayer.Database.DTOs.ClientDTO
 import com.huebelancer.timehound.ModelLayer.ModelLayer
 
 import com.huebelancer.timehound.R
+import com.huebelancer.timehound.Utilities.Analytics
 import com.huebelancer.timehound.Utilities.SubscriptionManager
 import kotlinx.android.synthetic.main.activity_client_detail.*
 
-class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClickListener, AppbarCallback {
+class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClickListener, DetailActivityCallback, ViewPager.OnPageChangeListener {
+
+    companion object {
+        val TAG = ClientDetailActivity::class.java.simpleName
+    }
+
+
 
     override fun setAppTitle(title: String) {
         supportActionBar?.title = title
@@ -64,16 +72,28 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
     private lateinit var headerCard: ConstraintLayout
     private lateinit var collapsingToolbarLayout: CollapsingToolbarLayout
 
+    private lateinit var fab: FloatingActionButton
+
     //endregion
 
+    //region Fragment callbacks
+    //TODO: Find a real way to handle this
+
+    private var currentCallback: FragmentShowCallback? = null
+    private var notesCallback: FragmentShowCallback? = null
+    private var historyCallback: FragmentShowCallback? = null
+
+    //endregion
 
     private var client: ClientDTO? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_client_detail)
 
         clientName = intent.getStringExtra(Constants.EXTRA_CLIENT_NAME)
+        Analytics.getInstance().viewedClient(clientName)
 
         DependencyRegistry.shared.inject(this)
 
@@ -83,8 +103,13 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
+        container.addOnPageChangeListener(this)
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
+    }
+
+    private fun setupFirstLoad() {
+        handleFabChange(container.currentItem)
     }
 
     private fun setupPagerAdapter() {
@@ -112,6 +137,8 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
         mChronometer    = findViewById(R.id.chronometer)
         headerCard      = findViewById(R.id.cardLayout)
 
+        fab             = findViewById(R.id.detailFAB)
+
 //        ViewCompat.setTransitionName(findViewById(R.id.appbar), EXTRA_IMAGE)
         collapsingToolbarLayout = findViewById(R.id.collapsingToolbarLayout)
 
@@ -128,6 +155,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
 
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "Activity onResume")
         setupUI()
     }
 
@@ -223,9 +251,9 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
 
         val item = menu.getItem(0)
         item.title = if (client?.hidden == null || !client?.hidden!!)
-            getString(R.string.show_client)
-        else
             getString(R.string.hide_client)
+        else
+            getString(R.string.show_client)
 
         return true
     }
@@ -265,16 +293,19 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
                 1 -> {
                     val frag = ClientNotesFragment.newInstance(pagerClient)
                     mSubscriptionManager.addSub(frag)
+                    notesCallback = frag
                     frag
                 }
                 2 -> {
                     val frag = ClientHistoryFragment.newInstance(pagerClient)
                     mSubscriptionManager.addSub(frag)
+                    historyCallback = frag
                     frag
                 }
                 else -> {
                     val frag = ClientFragment.newInstance(pagerClient)
                     mSubscriptionManager.addSub(frag)
+                    currentCallback = frag
                     frag
                 }
             }
@@ -283,22 +314,6 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
         override fun getCount(): Int {
             // Show 3 total pages.
             return 3
-        }
-
-        fun updateClient(client: ClientDTO) {
-            pagerClient.name = client.name
-            pagerClient.hidden = client.hidden
-            pagerClient.periods = client.periods
-            pagerClient.notes = client.notes
-
-            for(i in 0..count) {
-                try {
-                    (getItem(i) as ClientUpdateListener).onUpdate(pagerClient)
-                } catch (error: Exception) {
-                    error.printStackTrace()
-                }
-            }
-
         }
     }
 
@@ -351,6 +366,7 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
         this.client = client
         setupUI()
         mSubscriptionManager.update(client)
+        setupFirstLoad()
 //        mSectionsPagerAdapter?.updateClient(client)
     }
 
@@ -361,5 +377,70 @@ class ClientDetailActivity : AppCompatActivity(), ClientUICallback, View.OnClick
     override fun onError(error: Exception) {
         Toast.makeText(this, "Error Fetching Data!", Toast.LENGTH_SHORT).show()
     }
+
+
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+        Log.d(TAG, "onPageScrolled")
+    }
+    override fun onPageScrollStateChanged(state: Int) {
+        Log.d(TAG, "onPageScrollStateChanged")
+    }
+
+    override fun onPageSelected(position: Int) {
+        Log.d(TAG, "onPageSelected")
+        handleFabChange(position)
+    }
+
+    private fun handleFabChange(position: Int) {
+
+        Log.d(TAG, "handleFabChange called, ${position} is the current item")
+
+        var visibility: Int = 0
+        var resId: Int = 0
+        var listener: View.OnClickListener? = null
+
+        when (position) {
+            1 -> {
+                //Notes
+                visibility = View.VISIBLE
+                resId = R.drawable.ic_add_black_24dp
+                listener = notesCallback?.onFragmentShown()
+            }
+            2 -> {
+                //History
+                visibility = View.GONE
+                resId = R.drawable.ic_add_black_24dp
+                listener = historyCallback?.onFragmentShown()
+            }
+            else -> {
+                //Current
+                visibility = View.VISIBLE
+                resId = R.drawable.ic_receipt_black_24dp
+                listener = currentCallback?.onFragmentShown()
+            }
+        }
+
+        Log.d(TAG, "Listener is ${listener}")
+
+        setFabListener(
+                visibility,
+                resId,
+                listener
+        )
+    }
+
+
+    fun setFabListener(visibility: Int, resId: Int, listener: View.OnClickListener?) {
+        fab.setOnClickListener(null)
+        fab.visibility = visibility
+        fab.setImageDrawable(
+                ContextCompat.getDrawable(
+                        this,
+                        resId
+                )
+        )
+        fab.setOnClickListener(listener)
+    }
+
 
 }

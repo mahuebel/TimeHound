@@ -19,30 +19,31 @@ import android.widget.TextView
 import com.huebelancer.timehound.Activities.ClientDetailActivity
 import com.huebelancer.timehound.Coordinators.Coordinator
 import com.huebelancer.timehound.Dependencies.DependencyRegistry
-import com.huebelancer.timehound.Helpers.AppbarCallback
-import com.huebelancer.timehound.Helpers.ClientUpdateListener
-import com.huebelancer.timehound.Helpers.NoteClickListener
-import com.huebelancer.timehound.Helpers.OnNoteEditDone
+import com.huebelancer.timehound.Helpers.*
 import com.huebelancer.timehound.ModelLayer.Database.DTOs.ClientDTO
 import com.huebelancer.timehound.ModelLayer.Database.DTOs.NoteDTO
 
 import com.huebelancer.timehound.R
 
 
-class ClientNotesFragment : Fragment(), View.OnClickListener, ClientUpdateListener, NoteClickListener, OnNoteEditDone {
+class ClientNotesFragment : Fragment(), View.OnClickListener, ClientUpdateListener, NoteClickListener, OnNoteEditDone, FragmentShowCallback {
+    override fun onFragmentShown() : View.OnClickListener? {
+        return this
+    }
+
     private var clientName: String = ""
     private lateinit var presenter: ClientNotesPresenter
     private lateinit var coordinator: Coordinator
-    private lateinit var appbarCallback: AppbarCallback
+    private lateinit var detailActivityCallback: DetailActivityCallback
 
     private var recyclerView: RecyclerView? = null
-    private lateinit var fab: FloatingActionButton
+//    private lateinit var fab: FloatingActionButton
 
     private var client: ClientDTO? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        appbarCallback = activity as ClientDetailActivity
+        detailActivityCallback = activity as ClientDetailActivity
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,12 +62,12 @@ class ClientNotesFragment : Fragment(), View.OnClickListener, ClientUpdateListen
     }
 
     private fun attachUI(view: View?) {
-        fab = view!!.findViewById(R.id.addNoteFab)!!
-        recyclerView    = view.findViewById(R.id.recyclerView)
+//        fab = view!!.findViewById(R.id.addNoteFab)!!
+        recyclerView    = view?.findViewById(R.id.recyclerView)
 
         initializeListView()
 
-        fab.setOnClickListener(this)
+//        fab.setOnClickListener(this)
     }
 
     private fun initializeListView() {
@@ -120,25 +121,29 @@ class ClientNotesFragment : Fragment(), View.OnClickListener, ClientUpdateListen
 
     override fun onClick(view: View?) {
         when (view!!.id) {
-            R.id.addNoteFab -> {
-                val layout = LayoutInflater.from(activity).inflate(R.layout.dialog_edit_text, null, false)
-                val editText = layout.findViewById<TextInputEditText>(R.id.editText)
-                editText.hint = "Note"
-
-                val builder = AlertDialog.Builder(activity)
-                builder.setTitle("Add a Note")
-                        .setView(layout)
-                        .setPositiveButton("ADD", { dialog, which ->
-                            val noteText = editText.text.toString()
-
-                            if (noteText != "")
-                                presenter.addNote(noteText)
-                        })
-                        .setNegativeButton("Cancel", null)
-
-                builder.create().show()
+            R.id.detailFAB -> {
+                handleAddNoteClick()
             }
         }
+    }
+
+    fun handleAddNoteClick() {
+        val layout = LayoutInflater.from(activity).inflate(R.layout.dialog_edit_text, null, false)
+        val editText = layout.findViewById<TextInputEditText>(R.id.editText)
+        editText.hint = "Note"
+
+        val builder = AlertDialog.Builder(activity)
+        builder.setTitle("Add a Note")
+                .setView(layout)
+                .setPositiveButton("ADD", { dialog, which ->
+                    val noteText = editText.text.toString()
+
+                    if (noteText != "")
+                        presenter.addNote(noteText)
+                })
+                .setNegativeButton("Cancel", null)
+
+        builder.create().show()
     }
 
     override fun onUpdate(client: ClientDTO) {

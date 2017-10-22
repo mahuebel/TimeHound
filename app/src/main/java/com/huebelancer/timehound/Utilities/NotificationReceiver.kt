@@ -32,7 +32,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, Constants.NOTIFICATION_ONGOING)
                 .setContentTitle(activeName)
                 .setContentText(content)
-                .setSmallIcon(R.drawable.ic_timehound)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentIntent(pi)
                 .setOngoing(true)
                 .build()

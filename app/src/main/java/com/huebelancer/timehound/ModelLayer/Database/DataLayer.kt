@@ -14,6 +14,7 @@ import com.huebelancer.timehound.ModelLayer.Database.Models.Note
 import com.huebelancer.timehound.ModelLayer.Enums.EventType
 import com.huebelancer.timehound.ModelLayer.ModelLayer
 import com.huebelancer.timehound.ModelLayer.Translation.TranslationLayer
+import com.huebelancer.timehound.Utilities.Analytics
 import io.realm.Realm
 import io.realm.RealmResults
 import java.util.*
@@ -53,11 +54,13 @@ class DataLayer(private val realm: Realm, private val translationLayer: Translat
         Log.d(TAG, "Client added")
 
         loadClients(callback, showHidden)
+        Analytics.getInstance().clientAdded(clientDto)
     }
 
     fun addClientNote(client: String, text: String, callback: ModelLayer.RealmLoadCallback) {
         val noteTask = AddClientNoteTask(text, client, callback, translationLayer)
         noteTask.execute()
+        Analytics.getInstance().noteAdded()
     }
 
     fun toggleClientClock(clientName: String, callback: ModelLayer.RealmLoadCallback?) {
